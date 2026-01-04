@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { styles } from './styles';
 
-// Функция форматирования даты
+
 const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -29,7 +29,7 @@ const formatDate = (dateString: string): string => {
     return `${day}.${month}.${year}, ${hours}:${minutes}`;
 };
 
-// Тип записи
+
 interface Appointment {
     id: string;
     date: string;
@@ -40,13 +40,10 @@ interface Appointment {
     comment: string;
 }
 
-// Ключ для localStorage
 const STORAGE_KEY = 'groomer_appointments';
 
 function App() {
-    // Состояния
     const [appointments, setAppointments] = useState<Appointment[]>(() => {
-        // Начальное состояние - загрузка из localStorage
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -91,18 +88,15 @@ function App() {
         }
     }, [appointments, isInitialized]);
 
-    // Устанавливаем флаг инициализации после первого рендера
     useEffect(() => {
         setIsInitialized(true);
     }, []);
 
-    // Обновление списка клиентов для автодополнения
     useEffect(() => {
         const clientNames = [...new Set(appointments.map(app => app.clientName))];
         setClientSuggestions(clientNames.sort());
     }, [appointments]);
 
-    // Закрытие подсказок при клике вне
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
@@ -115,17 +109,14 @@ function App() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Ближайшая запись
     const nearestAppointment = appointments.length > 0
         ? appointments.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
         : null;
 
-    // Получить список всех клиентов
     const getAllClients = () => {
         return clientSuggestions;
     };
 
-    // Получить историю конкретного клиента
     const getClientHistory = (clientName: string) => {
         const clientAppointments = appointments
             .filter(app => app.clientName === clientName)
@@ -142,7 +133,6 @@ function App() {
         };
     };
 
-    // Обработчик изменения имени клиента с автодополнением
     const handleClientNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFormData({...formData, clientName: value});
@@ -154,7 +144,6 @@ function App() {
         }
     };
 
-    // Выбор клиента из подсказок
     const handleClientSelect = (clientName: string) => {
         setFormData({...formData, clientName});
         setShowSuggestions(false);
@@ -181,23 +170,19 @@ function App() {
         };
 
         if (editingAppointment) {
-            // Редактирование существующей записи
             const updatedAppointments = appointments.map(app =>
                 app.id === editingAppointment.id ? newAppointment : app
             );
             setAppointments(updatedAppointments);
             setEditingAppointment(null);
         } else {
-            // Добавление новой записи
             setAppointments([...appointments, newAppointment]);
         }
 
-        // Сброс формы
         setFormData({
             date: new Date().toISOString().slice(0, 16),
             clientName: '',
             petName: '',
-            // service: '',
             price: '',
             comment: ''
         });
@@ -205,11 +190,9 @@ function App() {
         setShowForm(false);
     };
 
-    // Начало редактирования записи
     const handleEdit = (appointment: Appointment) => {
         setEditingAppointment(appointment);
 
-        // Форматируем дату для input[type="datetime-local"]
         const date = new Date(appointment.date);
         const formattedDate = date.toISOString().slice(0, 16);
 
@@ -217,40 +200,26 @@ function App() {
             date: formattedDate,
             clientName: appointment.clientName,
             petName: appointment.petName,
-            // service: appointment.service,
             price: appointment.price.toString(),
             comment: appointment.comment
         });
         setShowForm(true);
     };
 
-    // Удалить запись
     const handleDelete = (id: string) => {
         if (window.confirm('Удалить эту запись?')) {
             setAppointments(appointments.filter(app => app.id !== id));
         }
     };
 
-    // Общая статистика
     const totalRevenue = appointments
         .reduce((sum, app) => sum + app.price, 0);
 
-    // Выбранная история клиента
     const selectedClientHistory = selectedClient ? getClientHistory(selectedClient) : null;
 
-    // Фильтр подсказок по введенному тексту
     const filteredSuggestions = clientSuggestions.filter(client =>
         client.toLowerCase().includes(formData.clientName.toLowerCase())
     );
-
-    // Очистить все данные
-    // const handleClearAllData = () => {
-    //     if (window.confirm('Вы уверены? Это удалит все записи и их нельзя будет восстановить.')) {
-    //         localStorage.removeItem(STORAGE_KEY);
-    //         setAppointments([]);
-    //         alert('Все данные очищены');
-    //     }
-    // };
 
     return (
         <div style={styles.container}>
@@ -260,20 +229,6 @@ function App() {
 
                 {appointments.length > 0 && (
                     <div style={{ marginTop: '10px' }}>
-                        {/*<button*/}
-                        {/*    onClick={handleClearAllData}*/}
-                        {/*    style={{*/}
-                        {/*        backgroundColor: '#f44336',*/}
-                        {/*        color: 'white',*/}
-                        {/*        border: 'none',*/}
-                        {/*        padding: '8px 16px',*/}
-                        {/*        borderRadius: '6px',*/}
-                        {/*        cursor: 'pointer',*/}
-                        {/*        fontSize: '14px'*/}
-                        {/*    }}*/}
-                        {/*>*/}
-                        {/*    🗑️ Очистить все данные*/}
-                        {/*</button>*/}
                         <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
                             Записей: {appointments.length} • Клиентов: {getAllClients().length}
                         </p>
@@ -283,7 +238,6 @@ function App() {
 
             <main style={styles.main}>
                 {showClientHistory ? (
-                    // Экран истории клиента
                     <div>
                         <button
                             onClick={() => {
@@ -317,9 +271,6 @@ function App() {
                                 {selectedClientHistory.appointments.map(appointment => (
                                     <div key={appointment.id} style={styles.historyItem}>
                                         <div style={styles.historyHeader}>
-                                            {/*<h4 style={styles.historyTitle}>*/}
-                                            {/*    {appointment.petName} • {appointment.service}*/}
-                                            {/*</h4>*/}
                                         </div>
 
                                         <div style={styles.historyDetails}>
@@ -333,20 +284,6 @@ function App() {
                                             </div>
                                         )}
 
-                                        {/*<div style={styles.historyActions}>*/}
-                                        {/*    <button*/}
-                                        {/*        onClick={() => handleEdit(appointment)}*/}
-                                        {/*        style={styles.smallButton}*/}
-                                        {/*    >*/}
-                                        {/*        ✏️ Редактировать*/}
-                                        {/*    </button>*/}
-                                        {/*    <button*/}
-                                        {/*        onClick={() => handleDelete(appointment.id)}*/}
-                                        {/*        style={styles.deleteButton}*/}
-                                        {/*    >*/}
-                                        {/*        × Удалить*/}
-                                        {/*    </button>*/}
-                                        {/*</div>*/}
                                     </div>
                                 ))}
                             </div>
@@ -357,9 +294,7 @@ function App() {
                         )}
                     </div>
                 ) : (
-                    // Главный экран
                     <>
-                        {/* Ближайшая запись */}
                         <section style={styles.section}>
                             <h2 style={styles.sectionTitle}>📅 Ближайшая запись</h2>
 
@@ -380,11 +315,6 @@ function App() {
                                             <span style={styles.infoValue}>{nearestAppointment.petName}</span>
                                         </div>
 
-                                        {/*<div style={styles.infoRow}>*/}
-                                        {/*    <span style={styles.infoLabel}>Услуга:</span>*/}
-                                        {/*    <span style={styles.infoValue}>{nearestAppointment.service}</span>*/}
-                                        {/*</div>*/}
-
                                         <div style={styles.infoRow}>
                                             <span style={styles.infoLabel}>Стоимость:</span>
                                             <span style={{...styles.infoValue, fontWeight: 'bold', color: '#2196F3'}}>
@@ -400,12 +330,6 @@ function App() {
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                        {/*<button*/}
-                                        {/*    onClick={() => handleEdit(nearestAppointment)}*/}
-                                        {/*    style={{ ...styles.viewHistoryButton, backgroundColor: '#FF9800' }}*/}
-                                        {/*>*/}
-                                        {/*    ✏️ Редактировать*/}
-                                        {/*</button>*/}
                                         <button
                                             onClick={() => {
                                                 setSelectedClient(nearestAppointment.clientName);
@@ -427,7 +351,6 @@ function App() {
                             )}
                         </section>
 
-                        {/* Кнопка добавления */}
                         <button
                             onClick={() => {
                                 setEditingAppointment(null);
@@ -438,7 +361,6 @@ function App() {
                             ➕ Записать клиента
                         </button>
 
-                        {/* Статистика */}
                         <div style={styles.stats}>
                             <div style={styles.statItem}>
                                 <span style={styles.statNumber}>{appointments.length}</span>
@@ -454,7 +376,6 @@ function App() {
                             </div>
                         </div>
 
-                        {/* Форма добавления/редактирования записи */}
                         {showForm && (
                             <div style={styles.overlay}>
                                 <div style={styles.formContainer}>
@@ -557,17 +478,6 @@ function App() {
                                             />
                                         </div>
 
-                                        {/*<div style={styles.formGroup}>*/}
-                                        {/*    <label style={styles.label}>Услуга *</label>*/}
-                                        {/*    <input*/}
-                                        {/*        type="text"*/}
-                                        {/*        value={formData.service}*/}
-                                        {/*        onChange={(e) => setFormData({...formData, service: e.target.value})}*/}
-                                        {/*        style={styles.input}*/}
-                                        {/*        required*/}
-                                        {/*    />*/}
-                                        {/*</div>*/}
-
                                         <div style={styles.formGroup}>
                                             <label style={styles.label}>Стоимость (₽) *</label>
                                             <input
@@ -615,7 +525,6 @@ function App() {
                             </div>
                         )}
 
-                        {/* История записей */}
                         <section style={styles.section}>
                             <h2 style={styles.sectionTitle}>📋 Последние записи</h2>
 
@@ -634,7 +543,6 @@ function App() {
 
                                                 <div style={styles.historyDetails}>
                                                     <span style={styles.historyDate}>{formatDate(appointment.date)}</span>
-                                                    {/*<span style={styles.historyService}>{appointment.service}</span>*/}
                                                     <span style={styles.historyPrice}>{appointment.price} ₽</span>
                                                 </div>
 
@@ -679,7 +587,6 @@ function App() {
                     </>
                 )}
 
-                {/* Модальное окно выбора клиента для истории */}
                 {showClientHistory && !selectedClient && (
                     <div style={styles.overlay}>
                         <div style={styles.formContainer}>
@@ -732,12 +639,6 @@ function App() {
                 )}
             </main>
 
-            <footer style={styles.footer}>
-                <p>© {new Date().getFullYear()} Груминг Дневник • Все записи сохраняются в браузере</p>
-                <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
-                    Данные хранятся локально в вашем браузере
-                </p>
-            </footer>
         </div>
     );
 }

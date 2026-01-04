@@ -3,7 +3,6 @@ export interface Appointment {
     date: string;
     clientName: string;
     petName: string;
-    // service: string;
     price: number;
     comment: string;
 }
