@@ -8,10 +8,7 @@
     "build": "tsc -b && vite build",
     "start": "react-scripts start",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
-    "homepage": "https://github.com/AlexandraZigzag/groomer.git/"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -30,6 +27,5 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
-  },
-  "homepage": "https://github.com/AlexandraZigzag/groomer.git/"
+  }
 }
