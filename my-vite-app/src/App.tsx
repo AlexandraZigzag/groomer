@@ -109,9 +109,26 @@ function App() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const nearestAppointment = appointments.length > 0
-        ? appointments.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
-        : null;
+    const getNearestAppointment = () => {
+        const now = new Date();
+        const futureAppointments = appointments.filter(app =>
+            new Date(app.date) >= now
+        );
+
+        if (futureAppointments.length === 0) {
+            return null;
+        }
+
+        return futureAppointments.sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        )[0];
+    };
+
+    const nearestAppointment = getNearestAppointment();
+
+    const futureAppointmentsCount = appointments.filter(app =>
+        new Date(app.date) >= new Date()
+    ).length;
 
     const getAllClients = () => {
         return clientSuggestions;
@@ -230,7 +247,7 @@ function App() {
                 {appointments.length > 0 && (
                     <div style={{ marginTop: '10px' }}>
                         <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                            Записей: {appointments.length} • Клиентов: {getAllClients().length}
+                            Записей: {appointments.length} • Клиентов: {getAllClients().length} • Ближайших: {futureAppointmentsCount}
                         </p>
                     </div>
                 )}
@@ -371,8 +388,8 @@ function App() {
                                 <span style={styles.statLabel}>Выручка</span>
                             </div>
                             <div style={styles.statItem}>
-                                <span style={styles.statNumber}>{getAllClients().length}</span>
-                                <span style={styles.statLabel}>Клиентов</span>
+                                <span style={styles.statNumber}>{futureAppointmentsCount}</span>
+                                <span style={styles.statLabel}>Предстоящих</span>
                             </div>
                         </div>
 
